@@ -14,38 +14,57 @@
  * Иногда промисы от API будут приходить в состояние rejected, (прямо как и API в реальной жизни)
  * Ответ будет приходить в поле {result}
  */
- import Api from '../tools/api';
+import { allPass, pipe, tryCatch, tap } from 'ramda';
+import Api from '../tools/api';
 
- const api = new Api();
+const api = new Api();
+const asyncPipe = (...fns) => input => fns.reduce(async (chain, fn) => {
+    const result = await chain;
+    return fn(result);
+}, Promise.resolve(input));
 
- /**
-  * Я – пример, удали меня
-  */
- const wait = time => new Promise(resolve => {
-     setTimeout(resolve, time);
- })
 
- const processSequence = ({value, writeLog, handleSuccess, handleError}) => {
-     /**
-      * Я – пример, удали меня
-      */
-     writeLog(value);
+const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
+    const app = tryCatch(
+        asyncPipe(
+            tap(val => writeLog('initial value: ' + val)),
+            tap(validate),
+            Number,
+            Math.round,
+            tap(val => writeLog('after round: ' + val)),
+            from10to2,
+            tap(result => writeLog('length: ' + result.length)),
+            Number,
+            num => Math.pow(num, 2),
+            num => num % 3,
+            tap(val => writeLog('after pow(x,2) % 3: ' + val)),
+            getAnimal,
+            handleSuccess
+        ),
+        err => handleError(err.message)
+    )
+    app(value)
+}
+const from10to2 = async (number) => {
+    return api.get('https://api.tech/numbers/base', { from: 10, to: 2, number: number }).then(({ result }) =>  result)
+}
 
-     api.get('https://api.tech/numbers/base', {from: 2, to: 10, number: '01011010101'}).then(({result}) => {
-         writeLog(result);
-     });
+const getAnimal = async (id) => {
+    return api.get(`https://animals.tech/${id}`, {}).then(({ result }) =>  result)
+}
 
-     wait(2500).then(() => {
-         writeLog('SecondLog')
+const validate = (value) => {
+    if (!validateString(value)) {
+        throw new Error('ValidationError')
+    }
+}
 
-         return wait(1500);
-     }).then(() => {
-         writeLog('ThirdLog');
+const validateString = allPass([
+    str => str.length < 10,
+    str => str.length > 2,
+    str => Number(str) > 0,
+    str => /^\d*\.?\d+$/.test(str)
+])
 
-         return wait(400);
-     }).then(() => {
-         handleSuccess('Done');
-     });
- }
 
 export default processSequence;
