@@ -12,7 +12,7 @@
  *
  * Если какие либо функции написаны руками (без использования библиотек) это не является ошибкой
  */
-import {equals, not, allPass, count, prop, complement} from 'ramda'
+import { equals, not, allPass, count, complement } from 'ramda'
 
 const isWhite = equals('white')
 const isRed = equals('red')
@@ -20,61 +20,64 @@ const isGreen = equals('green')
 const isBlue = equals('blue')
 const isOrange = equals('orange')
 
-const threeSame = obj => 
+const threeSameNotWhite = obj =>
     countProps(isRed, obj) === 3 ||
     countProps(isGreen, obj) === 3 ||
     countProps(isBlue, obj) === 3 ||
     countProps(isOrange, obj) === 3
 
-const sameColor = (...args) => {
-    const first = args
-    for (let i=0; i< args.length; i++) {
-
-    }
-}
-
-const getTriangle = prop('triangle')
-const getStar = prop('star')
-const getSquare = prop('square')
-
 const countProps = (fn, obj) => count(fn, Object.values(obj))
 
 // 1. Красная звезда, зеленый квадрат, все остальные белые.
-export const validateFieldN1 = ({star, square, triangle, circle}) =>
-    isWhite(circle) && isGreen(square) && isWhite(triangle) && isRed(star)
+export const validateFieldN1 = allPass([
+    ({ star }) => isRed(star),
+    ({ square }) => isGreen(square),
+    ({ triangle }) => isWhite(triangle),
+    ({ circle }) => isWhite(circle)
+])
 
 // 2. Как минимум две фигуры зеленые.
-export const validateFieldN2 = obj => 
+export const validateFieldN2 = obj =>
     countProps(isGreen, obj) >= 2
 
 // 3. Количество красных фигур равно кол-ву синих.
-export const validateFieldN3 = obj => 
+export const validateFieldN3 = obj =>
     countProps(isRed, obj) === countProps(isBlue, obj)
 
 // 4. Синий круг, красная звезда, оранжевый квадрат треугольник любого цвета
-export const validateFieldN4 = ({star, square, triangle, circle}) => 
-    isBlue(circle) && isRed(star) && isOrange(square)
+export const validateFieldN4 = allPass([
+    ({ star }) => isRed(star),
+    ({ square }) => isOrange(square),
+    ({ circle }) => isBlue(circle),
+])
 
 // 5. Три фигуры одного любого цвета кроме белого (четыре фигуры одного цвета – это тоже true).
-export const validateFieldN5 = obj => 
-    countProps(complement(isWhite), obj) >= 3 && threeSame(obj)
+export const validateFieldN5 = allPass([
+    obj => countProps(complement(isWhite), obj) >= 3,
+    threeSameNotWhite
+])
+
 
 // 6. Ровно две зеленые фигуры (одна из зелёных – это треугольник), плюс одна красная. Четвёртая оставшаяся любого доступного цвета, но не нарушающая первые два условия
-export const validateFieldN6 = obj => 
-    countProps(isGreen, obj) === 2 && isGreen(getTriangle(obj)) && countProps(isRed, obj) === 1
+export const validateFieldN6 = allPass([
+    obj => countProps(isGreen, obj) === 2,
+    ({ triangle }) => isGreen(triangle),
+    obj => countProps(isRed, obj) === 1
+])
 
 // 7. Все фигуры оранжевые.
-export const validateFieldN7 = obj => 
+export const validateFieldN7 = obj =>
     countProps(isOrange, obj) === 4
 
 // 8. Не красная и не белая звезда, остальные – любого цвета.
-export const validateFieldN8 = obj => 
-    not(isRed(getStar(obj))) && not(isWhite(getStar(obj)))
+export const validateFieldN8 = ({ star }) => not(isRed(star) || isWhite(star))
 
 // 9. Все фигуры зеленые.
-export const validateFieldN9 = obj => 
+export const validateFieldN9 = obj =>
     countProps(isGreen, obj) === 4
 
 // 10. Треугольник и квадрат одного цвета (не белого), остальные – любого цвета
-export const validateFieldN10 = obj => 
-    getSquare(obj) === getTriangle(obj) && not(isWhite(getSquare(obj)))
+export const validateFieldN10 = allPass([
+    ({ square, triangle }) => square === triangle,
+    ({ square }) => not(isWhite(square))
+])
