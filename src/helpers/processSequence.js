@@ -33,6 +33,7 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
             Math.round,
             tap(val => writeLog('after round: ' + val)),
             from10to2,
+            tap(result => writeLog('binary result: ' + result)),
             tap(result => writeLog('length: ' + result.length)),
             Number,
             num => Math.pow(num, 2),
@@ -46,11 +47,11 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
     app(value)
 }
 const from10to2 = async (number) => {
-    return api.get('https://api.tech/numbers/base', { from: 10, to: 2, number: number }).then(({ result }) =>  result)
+    return api.get('https://api.tech/numbers/base', { from: 10, to: 2, number: number }).then(({ result }) => result)
 }
 
 const getAnimal = async (id) => {
-    return api.get(`https://animals.tech/${id}`, {}).then(({ result }) =>  result)
+    return api.get(`https://animals.tech/${id}`, {}).then(({ result }) => result)
 }
 
 const validate = (value) => {

@@ -20,12 +20,6 @@ const isGreen = equals('green')
 const isBlue = equals('blue')
 const isOrange = equals('orange')
 
-const threeSameNotWhite = obj =>
-    countProps(isRed, obj) === 3 ||
-    countProps(isGreen, obj) === 3 ||
-    countProps(isBlue, obj) === 3 ||
-    countProps(isOrange, obj) === 3
-
 const countProps = (fn, obj) => count(fn, Object.values(obj))
 
 // 1. Красная звезда, зеленый квадрат, все остальные белые.
@@ -52,11 +46,11 @@ export const validateFieldN4 = allPass([
 ])
 
 // 5. Три фигуры одного любого цвета кроме белого (четыре фигуры одного цвета – это тоже true).
-export const validateFieldN5 = allPass([
-    obj => countProps(complement(isWhite), obj) >= 3,
-    threeSameNotWhite
-])
-
+export const validateFieldN5 = obj =>
+    countProps(isRed, obj) >= 3 ||
+    countProps(isGreen, obj) >= 3 ||
+    countProps(isBlue, obj) >= 3 ||
+    countProps(isOrange, obj) >= 3
 
 // 6. Ровно две зеленые фигуры (одна из зелёных – это треугольник), плюс одна красная. Четвёртая оставшаяся любого доступного цвета, но не нарушающая первые два условия
 export const validateFieldN6 = allPass([
