@@ -27,18 +27,18 @@ const asyncPipe = (...fns) => input => fns.reduce(async (chain, fn) => {
 const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
     const app = tryCatch(
         asyncPipe(
-            tap(val => writeLog('initial value: ' + val)),
+            tap(val => writeLog(val)),
             tap(validate),
             Number,
             Math.round,
-            tap(val => writeLog('after round: ' + val)),
+            tap(val => writeLog(val)),
             from10to2,
-            tap(result => writeLog('binary result: ' + result)),
-            tap(result => writeLog('length: ' + result.length)),
+            tap(result => writeLog(result)),
+            tap(result => writeLog(result.length)),
             Number,
             num => Math.pow(num, 2),
             num => num % 3,
-            tap(val => writeLog('after pow(x,2) % 3: ' + val)),
+            tap(val => writeLog(val)),
             getAnimal,
             handleSuccess
         ),
